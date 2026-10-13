@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectorRef} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import { HousingService } from '../housing-service';
 import {HousingLocationInfo} from '../housinglocation';
@@ -48,6 +48,7 @@ template: `
 export class Details {
   route: ActivatedRoute = inject(ActivatedRoute);
   housingService = inject(HousingService);
+  changeDetectorRef = inject(ChangeDetectorRef);
   housingLocation: HousingLocationInfo | undefined;
 
   applyForm = new FormGroup({
@@ -56,9 +57,12 @@ export class Details {
     email: new FormControl(''),
   });
 
-  constructor() {
-    const housingLocationId = Number(this.route.snapshot.params['id']);
-    this.housingLocation = this.housingService.getHousingLocationById(housingLocationId);
+constructor() {
+    const housingLocationId = parseInt(this.route.snapshot.params['id'], 10);
+    this.housingService.getHousingLocationById(housingLocationId).then((housingLocation) => {
+      this.housingLocation = housingLocation;
+      this.changeDetectorRef.markForCheck();
+    });
   }
 
   submitApplication() {
